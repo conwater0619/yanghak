@@ -373,6 +373,12 @@ body.hide-notice .notice-strip{display:none!important}
 .qr-ov .qi svg{width:100%;height:100%;display:block}
 .qr-ov .qu{font-size:clamp(14px,2.2vh,22px);color:var(--muted);max-width:90vw;text-align:center;word-break:break-all}
 .qr-ov .hint2{position:absolute;bottom:1.5vh;color:#9aa4b2;font-size:13px}
+.addr-ov{position:fixed;inset:0;z-index:92;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;cursor:pointer;animation:fadein .2s;padding:3vh}
+.addr-ov .at{font-family:"Jua",sans-serif;font-size:clamp(26px,5.5vh,64px);color:#2b3a4f;text-align:center}
+.addr-ov .aa{font-family:Consolas,"Courier New",ui-monospace,monospace;font-weight:700;color:#1b1b1b;white-space:nowrap;letter-spacing:0;line-height:1.15;text-align:center}
+.addr-ov .aa i{font-style:normal;color:#d4571f}
+.addr-ov .ah{font-size:clamp(16px,3vh,30px);color:#5b6b80;text-align:center}
+.addr-ov .hint2{position:absolute;bottom:1.5vh;color:#9aa4b2;font-size:13px}
 .tool-pill{position:fixed;right:16px;bottom:16px;z-index:70;background:#26303d;color:#fff;border-radius:999px;padding:8px 16px;font-family:"Jua",sans-serif;font-size:22px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25);display:flex;gap:12px;font-variant-numeric:tabular-nums}
 .tool-pill[hidden]{display:none}
 .tool-pill .w{color:#ff8a7a}
@@ -1679,6 +1685,8 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
       <div class="muted small" id="qrNote" style="text-align:center;min-height:1.2em"></div>
       <div class="tl-row">
         <button class="btn primary big" id="qrBig" disabled>📺 크게 띄우기</button>
+        <button class="btn" id="qrAddr" disabled>🔠 주소 글자로 크게</button>
+        <button class="btn" id="qrSelf">🏠 이 앱 주소 넣기</button>
         <button class="btn" id="qrSave" disabled>💾 그림으로 저장</button>
         <button class="btn" id="qrCopy" disabled>📋 주소 복사</button>
       </div>
@@ -4875,7 +4883,7 @@ function qrSvg(q, quiet){
 }
 function renderQr(){
   const raw = $('#qrText').value, {text, fixed} = qrFix(raw);
-  const btns = ['#qrBig','#qrSave','#qrCopy'];
+  const btns = ['#qrBig','#qrAddr','#qrSave','#qrCopy'];
   if (!text){ qrCur = null; $('#qrBox').innerHTML = '<div class="qr-empty">위 칸에 주소를 넣으면<br>QR코드가 바로 만들어져요</div>'; $('#qrNote').textContent = ''; btns.forEach(b => $(b).disabled = true); return; }
   const q = qrMake(text);
   if (!q){ qrCur = null; $('#qrBox').innerHTML = '<div class="qr-empty">글이 너무 길어서<br>QR코드로 만들 수 없어요</div>'; $('#qrNote').textContent = ''; btns.forEach(b => $(b).disabled = true); return; }
@@ -4905,6 +4913,24 @@ $('#qrBig').onclick = () => {
   qrRemember();
   const ov = document.createElement('div'); ov.className = 'qr-ov';
   ov.innerHTML = `${qrCur.title ? `<div class="qt">${esc(qrCur.title)}</div>` : ''}<div class="qi">${qrSvg(qrCur.q, 3)}</div><div class="qu">${esc(qrCur.text.length > 120 ? qrCur.text.slice(0, 120) + '…' : qrCur.text)}</div><div class="hint2">화면을 누르거나 Esc를 누르면 닫혀요</div>`;
+  const close = () => { ov.remove(); document.removeEventListener('keydown', k, true); };
+  const k = e => { if (e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  ov.onclick = close; document.addEventListener('keydown', k, true);
+  $('#dlgTools').close(); document.body.appendChild(ov);
+};
+$('#qrSelf').onclick = () => {
+  $('#qrText').value = siteUrl().replace(/index\.html$/, '');
+  if (!$('#qrTitle').value) $('#qrTitle').value = '이 주소를 주소창에 입력하세요';
+  renderQr();
+};
+$('#qrAddr').onclick = () => {
+  if (!qrCur) return;
+  qrRemember();
+  const shown = qrCur.text.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const fs = Math.max(24, Math.min(innerWidth * .92 / (shown.length * .62), innerHeight * .26));
+  const ov = document.createElement('div'); ov.className = 'addr-ov';
+  const html = [...shown].map(ch => /[0-9]/.test(ch) ? `<i>${ch}</i>` : esc(ch)).join('');
+  ov.innerHTML = `${qrCur.title ? `<div class="at">${esc(qrCur.title)}</div>` : ''}<div class="aa" style="font-size:${fs}px">${html}</div><div class="ah">${['https:// 는 안 쳐도 돼요', /[0-9]/.test(shown) ? '주황색 글자는 숫자예요' : '', /[A-Z]/.test(shown) ? '' : '영어는 모두 소문자예요'].filter(Boolean).join(' · ')}</div><div class="hint2">화면을 누르거나 Esc를 누르면 닫혀요</div>`;
   const close = () => { ov.remove(); document.removeEventListener('keydown', k, true); };
   const k = e => { if (e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); close(); } };
   ov.onclick = close; document.addEventListener('keydown', k, true);
