@@ -4964,12 +4964,12 @@ renderQrRecent();
 state.hbText = state.hbText || {};
 const HB_P = [
   ['care',   /도와|도움|배려|양보|친절|챙겨|챙김|위로|나눠|나누|다정|따뜻|감싸|격려|데려다|부축|살펴|보살|빌려/],
-  ['speak',  /발표|손\s?들|의견|질문|대답|말하기|토의|토론|참여/],
-  ['study',  /집중|열심|공부|과제|숙제|문제|풀이|풀었|독서|책|글쓰기|받아쓰기|익힘|복습|이해|학습/],
+  ['speak',  /발표|손\s?들|의견|질문|대답|말하기|토의|토론|수업\s?참여|적극/],
+  ['study',  /집중|열심|공부|과제|숙제|문제|풀이|풀었|푼\s|푼$|풀어|독서|책|글쓰기|받아쓰기|익힘|복습|이해|학습/],
   ['duty',   /정리|청소|당번|1인\s?1역|역할|책임|깨끗|정돈|준비물|봉사|쓰레기/],
   ['manner', /인사|예의|바른|규칙|질서|차례|존댓말|고운\s?말|바르게|약속/],
   ['team',   /모둠|협동|협력|함께|같이|사이좋|팀/],
-  ['create', /그림|그리|만들|아이디어|창의|표현|노래|상상|꾸미|작품/],
+  ['create', /그림|그리|만들|아이디어|창의|표현|노래|상상|꾸미|작품|합주|악기|연주|음악|합창|리코더|공연/],
   ['body',   /체육|운동|달리|급식|골고루|줄넘기|건강|편식/],
   ['steady', /꾸준|매일|성실|끝까지|노력|포기/]
 ];
@@ -5012,26 +5012,42 @@ function hbRange(p){
   if (p === 's1') return s1; if (p === 's2') return s2; if (p === 'all') return ['0000-00-00', '9999-99-99'];
   return (m > 8 || (m === 8 && day >= 16) || m <= 2) ? s2 : s1;
 }
+// 한 번 한 번 적은 메모를 하나씩 읽어요 (🙌 반 전체 칭찬의 공통 메모 포함, 빈 칸은 건너뜀)
+function hbNotesOf(times, notes, id, inR){
+  const out = [], ds = new Set([...Object.keys(times || {}), ...Object.keys(notes || {})]);
+  for (const d of ds){
+    if (!inR(d)) continue;
+    const occ = ((times || {})[d] || {})[id] || [];
+    let nd = ((notes || {})[d] || {})[id];
+    if (typeof nd === 'string') nd = nd ? [nd] : [];
+    nd = nd || [];
+    const n = Math.max(occ.length, nd.length);
+    for (let i = 0; i < n; i++){
+      const st = occ[i], t = String(st && st.b ? (state.batchNotes || {})[st.b] || '' : nd[i] || '').trim();
+      if (t) out.push([d, t]);
+    }
+  }
+  return out.sort((a, z) => a[0].localeCompare(z[0]));
+}
 function hbData(id){
   const [a, b] = hbRange(hbPer), inR = d => d >= a && d <= b;
-  let pc = 0, wc = 0; const pn = [], wn = [];
+  let pc = 0, wc = 0;
   for (const [d, L] of Object.entries(state.praiseLog || {})) if (inR(d)) pc += L[id] || 0;
   for (const [d, L] of Object.entries(state.warnLog || {})) if (inR(d)) wc += L[id] || 0;
-  for (const [d, N] of Object.entries(state.praiseNotes || {})) if (inR(d) && N[id]) pn.push([d, N[id]]);
-  for (const [d, N] of Object.entries(state.warnNotes || {})) if (inR(d) && N[id]) wn.push([d, N[id]]);
-  pn.sort(); wn.sort();
+  const pn = hbNotesOf(state.praiseTimes, state.praiseNotes, id, inR), wn = hbNotesOf(state.warnTimes, state.warnNotes, id, inR);
   return {pc, wc, pn, wn};
 }
-function hbScore(notes, table){
+function hbScore(notes, table, R){
   const sc = {};
   notes.forEach(([, t]) => table.forEach(([k, re]) => { if (re.test(t)) sc[k] = (sc[k] || 0) + 1; }));
-  return Object.entries(sc).sort((x, y) => y[1] - x[1]).map(([k]) => k);
+  // 많이 나온 분류가 먼저, 횟수가 같으면 ‘다른 문장으로’를 누를 때마다 순서가 바뀌게
+  return Object.entries(sc).map(([k, v]) => [k, v, R ? R() : 0]).sort((x, y) => y[1] - x[1] || x[2] - y[2]).map(x => x[0]);
 }
 function hbRand(seed){ let x = seed >>> 0 || 1; return () => { x ^= x << 13; x >>>= 0; x ^= x >> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; }
 function hbMake(id, seed){
   const D = hbData(id), R = hbRand((seed || 0) * 7919 + [...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0));
   const pick = arr => arr[Math.floor(R() * arr.length)];
-  const pk = hbScore(D.pn, HB_P), wk = hbScore(D.wn, HB_W);
+  const pk = hbScore(D.pn, HB_P, R), wk = hbScore(D.wn, HB_W, R);
   const allP = state.students.filter(s => s.name.trim()).map(s => hbData(s.id).pc).sort((a, b) => b - a);
   const top = allP.length && D.pc > 0 && D.pc >= allP[Math.floor(allP.length * 0.3)];
   const used = new Set(), out = [];
