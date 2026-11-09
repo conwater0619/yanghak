@@ -1928,7 +1928,7 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
 
 <script>
 (() => {
-const KEY = 'seat-shuffle-v1';
+const KEY = 'yanghak-classroom-v1';
 const PALETTE = ['#d3e6ff','#fff2b8','#d6f2d2','#fde0ef','#ffe3cc','#e7defd','#ccf2ec','#fdd9d9','#eef5c4','#f0e2d2'];
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -3667,7 +3667,7 @@ $('#gImg').onclick = () => {
 /* ---------- 서류 양식 (PDF에 이름 넣기) ---------- */
 const idb = {
   db: null,
-  open(){ return this.db || (this.db = new Promise((res, rej) => { const r = indexedDB.open('seat-shuffle-files', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
+  open(){ return this.db || (this.db = new Promise((res, rej) => { const r = indexedDB.open('yanghak-classroom-files', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
   async run(mode, fn){ const db = await this.open(); return new Promise((res, rej) => { const st = db.transaction('files', mode).objectStore('files'); const q = fn(st); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
   get(k){ return this.run('readonly', st => st.get(k)); },
   set(k, v){ return this.run('readwrite', st => st.put(v, k)); },
