@@ -4054,6 +4054,17 @@ function renderShortcut(){
       + `<p class="muted small">저장해 둔 학생 정보와 자리 배치는 앱에서도 그대로 이어져요. 인터넷이 잠깐 끊겨도 자리 바꾸기·발표자 뽑기 같은 기본 기능은 쓸 수 있어요.</p>`
       + `<details class="small" style="margin-top:8px"><summary class="muted" style="cursor:pointer">앱 설치가 안 될 때: 바로가기 파일 받기</summary><p class="muted">바로가기 파일을 받아 바탕화면으로 끌어다 놓으면, 두 번 클릭해서 이 주소를 열 수 있어요.</p><button class="btn" id="scDown">⬇️ 바로가기 파일 받기</button></details>`;
   }
+  if (online && (os === 'win' || os === 'mac')){
+    const steps = os === 'mac'
+      ? `<li>앱으로 설치한 뒤, 맥의 <b>시스템 설정 → 일반 → 로그인 항목</b>에서 <b>＋</b>를 눌러 설치한 앱(😊)을 추가해요.</li>`
+      : `<li><b>엣지</b>: 주소창에 <b>edge://apps</b> 를 입력 → 설치한 앱의 <b>…</b> → <b>세부 정보</b> → <b>로그인 시 앱 시작</b>을 켜요.</li>
+         <li><b>크롬 등</b>: 바탕화면 😊 아이콘을 복사한 뒤, 키보드 <b>Win + R</b> → <b>shell:startup</b> 을 입력해 열리는 폴더에 붙여 넣어요.</li>
+         <li><b>정해진 시각에 켜기</b>: 윈도우 <b>작업 스케줄러</b>에 “매일 아침 8시 20분에 😊 아이콘 실행”을 등록해요. (‘컴퓨터를 깨워서 실행’ 옵션도 있어요)</li>`;
+    h += `<details class="small" style="margin-top:10px"${isStandalone() ? ' open' : ''}><summary style="cursor:pointer"><b>🌅 아침에 컴퓨터를 켜면 자동으로 열리게 하기</b></summary>
+      <p class="muted" style="margin:6px 0">웹앱은 스스로 시작 프로그램에 등록할 수 없어서, <b>앱으로 설치한 뒤 컴퓨터에서 한 번만</b> 설정하면 돼요.</p>
+      <ol style="padding-left:20px;margin:6px 0">${steps}</ol>
+      <p class="muted" style="margin:6px 0">학교 컴퓨터는 관리자가 시작 프로그램을 막아 두었을 수 있어요. 그럴 땐 바탕화면 아이콘을 더블클릭해서 열면 돼요.</p></details>`;
+  }
   $('#scBody').innerHTML = h;
   const b = $('#scDown'); if (b) b.onclick = makeShortcut;
   const ib = $('#scInstall'); if (ib) ib.onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch(e){} installEvt = null; renderShortcut(); };
