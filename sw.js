@@ -1,5 +1,5 @@
 // 웃음이 넘치는 교실 - 오프라인용 서비스 워커
-const VER = 'yanghak-v87';
+const VER = 'yanghak-v92';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './forms/absence.pdf'];
 const CDN = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
