@@ -965,8 +965,9 @@ dialog.cam-dlg::backdrop{background:#111}
 .doc-bar .sep{width:1px;background:rgba(255,255,255,.25);margin:4px 2px}
 .doc-bar .pc{width:34px;padding:0;background:var(--pc)!important;border:3px solid rgba(255,255,255,.7)}
 .doc-dlg.barhidden .doc-bar{transform:translateX(-50%) translateY(170%);opacity:0;pointer-events:none}
-.doc-showbar{position:absolute;left:50%;bottom:2vh;transform:translateX(-50%);display:none;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:16px;padding:10px 20px;cursor:pointer;z-index:4}
+.doc-showbar{position:absolute;left:calc(50% - 6px);bottom:2vh;transform:translateX(-100%);display:none;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:16px;padding:10px 20px;cursor:pointer;z-index:4}
 .doc-dlg.barhidden .doc-showbar{display:block}
+.doc-showbar.doc-showclose{left:calc(50% + 6px);transform:none;background:rgba(170,40,40,.8)}
 .doc-palette{position:absolute;left:50%;bottom:10vh;transform:translateX(-50%);display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:90vw;background:rgba(0,0,0,.72);padding:12px 16px;border-radius:16px;z-index:5}
 .doc-palette[hidden]{display:none}
 .doc-palette button{width:40px;height:40px;border-radius:50%;border:3px solid rgba(255,255,255,.55);cursor:pointer;padding:0}
@@ -1246,7 +1247,7 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
       <div class="board">칠 판</div>
       <div class="floor"><div class="lane" id="laneL"></div><div class="seats" id="seats"></div><div class="lane" id="laneR"></div></div>
     </div>
-    <div class="hint" id="hint"></div> <div class="hint" id="tlNote"></div> <div class="hint" id="updNote">🆕 최종 업데이트 <b id="updDate">11월 20일 08:37</b> · 업데이트 내역은 ⋯ 더보기 → 업데이트 내역에서 확인할 수 있어요.</div>
+    <div class="hint" id="hint"></div> <div class="hint" id="tlNote"></div> <div class="hint" id="updNote">🆕 최종 업데이트 <b id="updDate">11월 25일 10:58</b> · 업데이트 내역은 ⋯ 더보기 → 업데이트 내역에서 확인할 수 있어요.</div>
     <div class="demo-pill" id="demoPill" hidden>🧪 체험 중 <button id="demoEnd">체험 끝내기</button></div>
   </main>
 </div>
@@ -2096,6 +2097,10 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
     <button class="btn x" data-close>닫기</button>
   </div>
   <div class="sheet-body upd-log">
+    <h3>2026년 11월 25일</h3>
+    <ul>
+      <li><span class="tm">10:58</span> <b>📷 카메라 시작 모습</b>: 카메라를 켜면 도구 막대가 숨겨진 채로 시작해요. 화면 아래 <b>🛠️ 도구</b>를 누르면 도구가 보이고, 옆의 <b>✕ 닫기</b>로 바로 닫을 수 있어요.</li>
+    </ul>
     <h3>2026년 11월 20일</h3>
     <ul>
       <li><span class="tm">08:37</span> <b>🥛 우유 + ✅ 과제 확인 같이 쓰기</b>: 우유 모드를 켠 채로 과제 확인도 할 수 있어요. 둘을 같이 켜면 책상(이름)을 누르면 과제 체크, 의자(얼굴)를 누르면 우유 체크예요.</li>
@@ -2262,6 +2267,7 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
   </div>
   <div class="doc-palette" id="docPalette" hidden></div>
   <button class="doc-showbar" id="docShowBar" title="도구 막대 다시 보이기">🛠️ 도구</button>
+  <button class="doc-showbar doc-showclose" id="docShowClose" title="카메라 닫기">✕ 닫기</button>
 </dialog>
 <dialog class="cam-dlg" id="dlgCam">
   <video id="camVid" autoplay playsinline muted></video>
@@ -6953,7 +6959,7 @@ function openDoc(){
   const sv = S.doc || {};
   Object.assign(DOC, {rot: sv.rot || 0, zoom: 1, x: 0, y: 0, mir: !!sv.mir, bright: !!sv.bright, text: !!sv.text, frozen: false, pen: false});
   $('#docFrz').hidden = true; $('#docVid').hidden = false;
-  $('#dlgDoc').classList.remove('barhidden'); $('#docPalette').hidden = true;
+  $('#dlgDoc').classList.add('barhidden'); $('#docPalette').hidden = true;   /* 카메라는 도구 막대를 숨긴 채로 시작 */
   $('#dlgDoc').showModal(); docApply(); docPenSize(); docClearPen();
   docStart(S.docCamId);
 }
@@ -7079,7 +7085,7 @@ async function startDocRec(){
 $('#docRec').onclick = () => { if (docRec && docRec.state === 'recording') stopDocRec(); else startDocRec(); };
 
 $('#dlgDoc').addEventListener('close', () => { stopDocRec(); docStop(); });
-$('#docClose').onclick = () => $('#dlgDoc').close();
+$('#docClose').onclick = $('#docShowClose').onclick = () => $('#dlgDoc').close();
 $('#docSel').onchange = e => docStart(e.target.value);
 $('#docRot').onclick = () => { DOC.rot = (DOC.rot + 90) % 360; docClearPen(); docApply(true); };
 $('#docIn').onclick = () => docZoom(.25);
