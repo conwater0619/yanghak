@@ -964,7 +964,8 @@ dialog.cam-dlg::backdrop{background:#111}
 #docDirX{padding:7px 8px!important}
 .doc-bar .sep{width:1px;background:rgba(255,255,255,.25);margin:4px 2px}
 .doc-bar .pc{width:34px;padding:0;background:var(--pc)!important;border:3px solid rgba(255,255,255,.7)}
-.doc-dlg.barhidden .doc-bar{transform:translateX(-50%) translateY(170%);opacity:0;pointer-events:none}
+.doc-dlg.barhidden .doc-bar{transform:translateX(-50%) translateY(170%);opacity:0;pointer-events:none;visibility:hidden}
+.doc-dlg{overflow:clip!important}   /* 숨긴 막대로 포커스가 가도 화면이 밀려 올라가지 않게 */
 .doc-showbar{position:absolute;left:calc(50% - 6px);bottom:2vh;transform:translateX(-100%);display:none;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:16px;padding:10px 20px;cursor:pointer;z-index:4}
 .doc-dlg.barhidden .doc-showbar{display:block}
 .doc-showbar.doc-showclose{left:calc(50% + 6px);transform:none;background:rgba(170,40,40,.8)}
@@ -1247,7 +1248,7 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
       <div class="board">칠 판</div>
       <div class="floor"><div class="lane" id="laneL"></div><div class="seats" id="seats"></div><div class="lane" id="laneR"></div></div>
     </div>
-    <div class="hint" id="hint"></div> <div class="hint" id="tlNote"></div> <div class="hint" id="updNote">🆕 최종 업데이트 <b id="updDate">11월 25일 10:58</b> · 업데이트 내역은 ⋯ 더보기 → 업데이트 내역에서 확인할 수 있어요.</div>
+    <div class="hint" id="hint"></div> <div class="hint" id="tlNote"></div> <div class="hint" id="updNote">🆕 최종 업데이트 <b id="updDate">11월 25일 11:06</b> · 업데이트 내역은 ⋯ 더보기 → 업데이트 내역에서 확인할 수 있어요.</div>
     <div class="demo-pill" id="demoPill" hidden>🧪 체험 중 <button id="demoEnd">체험 끝내기</button></div>
   </main>
 </div>
@@ -2099,7 +2100,7 @@ textarea.bulk{width:100%;min-height:70px;padding:10px;border:1px solid var(--lin
   <div class="sheet-body upd-log">
     <h3>2026년 11월 25일</h3>
     <ul>
-      <li><span class="tm">10:58</span> <b>📷 카메라 시작 모습</b>: 카메라를 켜면 도구 막대가 숨겨진 채로 시작해요. 화면 아래 <b>🛠️ 도구</b>를 누르면 도구가 보이고, 옆의 <b>✕ 닫기</b>로 바로 닫을 수 있어요.</li>
+      <li><span class="tm">11:06</span> <b>📷 카메라 시작 모습</b>: 카메라를 켜면 도구 막대가 숨겨진 채로 시작해요. 화면 아래 <b>🛠️ 도구</b>를 누르면 도구가 보이고, 옆의 <b>✕ 닫기</b>로 바로 닫을 수 있어요.</li>
     </ul>
     <h3>2026년 11월 20일</h3>
     <ul>
@@ -6960,7 +6961,7 @@ function openDoc(){
   Object.assign(DOC, {rot: sv.rot || 0, zoom: 1, x: 0, y: 0, mir: !!sv.mir, bright: !!sv.bright, text: !!sv.text, frozen: false, pen: false});
   $('#docFrz').hidden = true; $('#docVid').hidden = false;
   $('#dlgDoc').classList.add('barhidden'); $('#docPalette').hidden = true;   /* 카메라는 도구 막대를 숨긴 채로 시작 */
-  $('#dlgDoc').showModal(); docApply(); docPenSize(); docClearPen();
+  $('#dlgDoc').showModal(); $('#dlgDoc').scrollTop = 0; docApply(); docPenSize(); docClearPen();
   docStart(S.docCamId);
 }
 function docZoom(dz){ DOC.zoom = Math.min(5, Math.max(1, +(DOC.zoom + dz).toFixed(2))); if (DOC.zoom === 1){ DOC.x = 0; DOC.y = 0; } docClearPen(); docApply(true); }
